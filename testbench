@@ -1,0 +1,59 @@
+ATM1 uut (.clk(clk), .rst(rst), .insertcard(insertcard), .cardscan(cardscan), .acc_unlocked(acc_unlocked), .deposit(deposit), .withdraw(withdraw), .ministate(ministate), .amt_entered(amt_entered), .valid_transaction(valid_transaction), .transaction_verified(transaction_verified), .more_transaction(more_transaction), 
+.pin(pin),.Amount(Amount),.z(z));
+
+always #10 clk=~clk;
+
+initial 
+begin
+	clk=0;
+	#10 rst=1'b0;
+	#10 insertcard=1'b1;
+	#10 pin=4'b1111;
+	
+	#20 withdraw=4'b0000;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b0;
+	#10 more_transaction=1'b0;
+	
+	#20 withdraw=4'b0001;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b1;
+	#10 more_transaction=1'b0;
+	
+	#20 withdraw=4'b0010;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b0;
+	#10 more_transaction=1'b1;
+   
+	#20 withdraw=4'b0011;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b1;
+	#10 more_transaction=1'b1;
+	
+	#20 deposit=4'b0100;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b0;
+	#10 more_transaction=1'b0;
+	
+	#20 deposit=4'b0101;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b1;
+	#10 more_transaction=1'b0; 
+	
+	#20 deposit=4'b0110;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b0;
+	#10 more_transaction=1'b1; 
+   
+	#20 deposit=4'b0111;
+	#10 amt_entered=1'b1;
+	#10 valid_transaction=1'b1;
+	#10 more_transaction=1'b1; 
+	
+	#20 ministate=4'b1000;
+
+
+
+end 
+
+endmodule 
