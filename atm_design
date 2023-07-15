@@ -1,31 +1,16 @@
-module ATM1 ( input clk, rst, insertcard, cardscan, acc_unlocked, deposit,withdraw,ministate, amt_entered, valid_transaction, transaction_verified, more_transaction, 
-input [3:0] PIN,
-input [15:0] Amount, 
+module ATM1 ( input clk, rst, insertcard, cardscan, acc_unlocked, deposit,withdraw,ministate, amt_entered, transaction_verified, more_transaction, 
+input pin_valid,
+input Amount_valid, 
 output reg z ); 
 
 reg [1:0] ipin_count; // invalid PIN counter 
 
-parameter [4:0] scan_card = 5'b00000, 
-scan_line = 5'b00001, 
-storing_info = 5'b00010, 
-enter_pin = 5'b00011, 
-count = 5'b00100, 
-transaction_type = 5'b00110, 
-enter_deposit_amount = 5'b00111, 
-dep_check = 5'b01000, 
-invalid = 5'b01001, 
-anything_else = 5'b01010, 
-dep_verify = 5'b01011, 
-updating_balance = 5'b01100, 
-enter_wd_amount = 5'b1101, 
-wd_check = 5'b01110, 
-wd_verify = 5'b01111, 
-mini_state = 5'b10000;
+parameter [4:0] scan_card = 5'b00000, scan_line = 5'b00001, storing_info = 5'b00010, enter_pin = 5'b00011, count = 5'b00100, transaction_type = 5'b00110, enter_deposit_amount = 5'b00111, dep_check = 5'b01000, invalid = 5'b01001,anything_else = 5'b01010, dep_verify = 5'b01011, updating_balance = 5'b01100, enter_wd_amount = 5'b1101, wd_check = 5'b01110, wd_verify = 5'b01111, mini_state = 5'b10000,eject_bill=5'b10001;
 
 reg [3:0] state,next; 
-reg [3:0] cardPIN=4'b1111; 
+reg [3:0] cardpin=4'b1111; 
 reg [15:0] balance=16'b0001111111111000; 
-
+reg[4:0] Amount=4'b1111;
 
 always @(posedge clk) 
 begin
@@ -57,14 +42,14 @@ begin
 								next = scan_card; 
 								ipin_count = 2'b0; 
 						 end 
-		enter_pin:if(PIN==cardPIN) //S3 
+		enter_pin:if(pin_valid) //S3 
 						next = transaction_type; 
 					 else begin 
 							ipin_count = ipin_count+1; 
 							next = count; end
 		count: 
 				begin 
-				if (PIN==cardPIN) //S4 
+				if (pin_valid) //S4 
 			     next = transaction_type; 
 		      else if(ipin_count != 3 ) begin 
                     ipin_count = ipin_count+1; 
@@ -82,14 +67,14 @@ begin
                          else if (ministate) 
                                  next = scan_card;
       enter_deposit_amount:if(amt_entered)//S6 
-                             next = dep_check; 
+                             next = dep_verify; 
                            else 
                              next = transaction_type; 
-      dep_check:if(Amount<=(~balance)) //S7 
+      /*dep_check:if(Amount<=(~balance)) //S7 
                   next = dep_verify; 
                 else 
                   next = invalid; 
-      invalid : next = anything_else; //S8 
+      invalid : next = anything_else; //S8 */
       anything_else:if(more_transaction) //S9 
                       next = transaction_type; 
                     else
@@ -120,12 +105,12 @@ begin
 						 end 
                   else  
                     next = wd_verify; 
-       mini_state:if(valid_transaction)
-		              begin 
-                     next =  anything_else;
+       mini_state:	begin
+							next =eject_bill;
                     end
-                  else
-                   next = scan_card; 
+       eject_bill: begin
+							next =scan_card;
+						end
 
  default : begin 
            next = scan_card; 
@@ -145,3 +130,4 @@ end
 	
 	
 endmodule
+
